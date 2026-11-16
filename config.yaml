@@ -1,0 +1,123 @@
+# job-watch config. Edit freely; nothing here is hardcoded in the code.
+
+companies:
+  # ---------- Greenhouse ----------
+  - name: Arcesium
+    platform: greenhouse
+    token: arcesiumllc          # verified
+  - name: Agoda
+    platform: greenhouse
+    token: agoda                # verified
+  - name: Rubrik
+    platform: greenhouse
+    token: rubrik               # platform verified, token unverified
+  - name: Stripe
+    platform: greenhouse
+    token: stripe               # unverified
+  - name: Coinbase
+    platform: greenhouse
+    token: coinbase             # unverified
+
+  # ---------- Workday ----------
+  - name: Salesforce
+    platform: workday
+    host: salesforce.wd12.myworkdayjobs.com
+    tenant: salesforce
+    site: External_Career_Site  # verified
+    country: India              # server-side narrowing: value of the tenant's "Country" facet
+    filters:                    # ladder: MTS (~2-4 yrs) < SMTS (~4.5+) < LMTS < PMTS
+      title_include_add: [smts]
+      title_exclude_add: [pmts]
+      title_exclude_remove: [staff]   # "Member of Technical Staff" is the IC title here
+  - name: Adobe
+    platform: workday
+    host: adobe.wd5.myworkdayjobs.com
+    tenant: adobe
+    site: external_experienced  # verified
+    country: India
+    filters:                    # ladder: MTS / Computer Scientist 1-2 < Senior Computer Scientist
+      title_include_add: [computer scientist]
+      title_exclude_add: [senior computer scientist, sr computer scientist]
+      title_exclude_remove: [staff]   # "Member of Technical Staff" is the IC title here
+  # - name: Akamai              # likely Workday; get host/tenant/site from any job's Apply URL
+  #   platform: workday
+
+  # ---------- SmartRecruiters ----------
+  - name: ServiceNow
+    platform: smartrecruiters
+    company_id: ServiceNow      # verified
+    country: in                 # server-side narrowing: ISO 3166 alpha-2 code
+    filters:                    # Staff here is IC4 (~8+ yrs), so the global "staff" exclude stays
+      title_include_add: [applications dev engineer]
+
+  # ---------- v2 / not supported yet ----------
+  # Confluent: Ashby (likely) | Rippling: ats.rippling.com/rippling
+  # Bloomberg: Avature | Intuit: custom portal | LinkedIn: use LinkedIn job alerts
+  # Booking, Zalando: platform not checked yet
+
+filters:
+  title_include:
+    - software engineer
+    - software developer
+    - software development engineer
+    - sde
+    - backend
+    - back end
+    - member of technical staff   # Salesforce MTS / SMTS
+    - mts
+    - ai engineer
+    - ml engineer
+    - machine learning engineer
+    - python
+  # Matching is case-insensitive and whole-word. Exclude beats include.
+  # A company can adjust these lists with its own `filters:` block:
+  #   title_include_add, title_exclude_add, title_exclude_remove
+  title_exclude:
+    - intern
+    - new grad
+    - graduate
+    - staff
+    - principal
+    - architect
+    - lead
+    - manager
+    - director
+    - vp
+    - head of
+    - frontend
+    - front end
+    - ios
+    - android
+    - qa
+    - sdet
+    - test
+  # Anywhere in India (office or remote). City names are needed because some
+  # boards list only cities (e.g. "Bengaluru; Gurugram; Hyderabad").
+  # "Remote - US" fails because it mentions none of these.
+  locations:
+    india:
+      - india
+      - bangalore
+      - bengaluru
+      - gurgaon
+      - gurugram
+      - noida
+      - delhi
+      - hyderabad
+      - pune
+      - mumbai
+      - chennai
+      - kolkata
+      - ahmedabad
+      - jaipur
+      - kochi
+      - trivandrum
+      - thiruvananthapuram
+      - coimbatore
+      - chandigarh
+      - mohali
+      - indore
+
+first_run:
+  lookback_days: 7
+  max_digest_size: 100
