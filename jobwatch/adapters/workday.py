@@ -2,9 +2,11 @@
 
 - POST {base}/jobs, `limit` max 20, paginate with `offset`.
 - `total` is only reliable on the first page (later pages return 0).
-- Server-side narrowing: each tenant exposes a facet whose descriptor is
-  "Country" (the facetParameter name differs per tenant, and it may be nested
-  under locationMainGroup). We look it up from the first response.
+- Server-side narrowing: most tenants expose a country facet (named
+  "Country", "Country / Territory", "Location Country"...; the facetParameter
+  differs per tenant and may be nested under locationMainGroup). Tenants
+  without one (e.g. Intel) have a "Locations" facet with values like
+  "India, Bangalore"; then every location value naming the country is used.
 - Multi-location postings list `locationsText` as e.g. "2 Locations". We use
   the primary location from the URL path instead, e.g. "India - Hyderabad
   (+1 more)". (Fetching each job's detail gave the full list but tripped the
@@ -40,11 +42,11 @@ def fetch(company_cfg, today=None):
     applied = {}
     country = company_cfg.get("country")
     if country:
-        facet = find_facet_value(first.get("facets") or [], "Country", country)
-        if facet is None:
-            raise LookupError(f"no '{country}' value in a 'Country' facet")
-        param, value_id = facet
-        applied = {param: [value_id]}
+        found = find_country_filter(first.get("facets") or [], country)
+        if found is None:
+            raise LookupError(f"no '{country}' value in a country or locations facet")
+        param, value_ids = found
+        applied = {param: value_ids}
         first = post_json(f"{base}/jobs", _body(applied, 0))
 
     total = first.get("total", 0)
@@ -73,21 +75,31 @@ def post_json(url, body):
     return http.post_json(url, body)
 
 
-def find_facet_value(facets, facet_descriptor, value_descriptor):
-    """Return (facetParameter, value id) for the first facet named
-    `facet_descriptor` holding a value named `value_descriptor`. Searches
-    nested facet groups. Case-insensitive."""
-    for facet in facets:
-        values = facet.get("values") or []
-        if (facet.get("descriptor") or "").lower() == facet_descriptor.lower():
-            for v in values:
-                if (v.get("descriptor") or "").lower() == value_descriptor.lower():
-                    return facet["facetParameter"], v["id"]
-        nested = [v for v in values if "facetParameter" in v]
-        found = find_facet_value(nested, facet_descriptor, value_descriptor)
-        if found:
-            return found
+def find_country_filter(facets, country):
+    """Return (facetParameter, [value ids]) that narrows results to `country`,
+    or None. Prefers a country facet with an exact value; falls back to a
+    locations facet, selecting every value that names the country."""
+    flat = list(_all_facets(facets))
+    for facet in flat:
+        if "country" in (facet.get("descriptor") or "").lower():
+            for v in facet.get("values") or []:
+                if (v.get("descriptor") or "").strip().lower() == country.lower():
+                    return facet["facetParameter"], [v["id"]]
+    word = re.compile(rf"(?<!\w){re.escape(country)}(?!\w)", re.IGNORECASE)
+    for facet in flat:
+        if "location" in (facet.get("descriptor") or facet.get("facetParameter") or "").lower():
+            ids = [v["id"] for v in facet.get("values") or []
+                   if "id" in v and word.search(v.get("descriptor") or "")]
+            if ids:
+                return facet["facetParameter"], ids
     return None
+
+
+def _all_facets(facets):
+    for facet in facets:
+        yield facet
+        nested = [v for v in facet.get("values") or [] if "facetParameter" in v]
+        yield from _all_facets(nested)
 
 
 def parse_posting(company, host, site, posting, today):

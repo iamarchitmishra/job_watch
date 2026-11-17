@@ -35,17 +35,32 @@ def test_parse_posted_on(text, expected):
 
 def test_country_facet_top_level_salesforce(load_fixture):
     facets = load_fixture("workday_salesforce_unfiltered.json")["facets"]
-    assert workday.find_facet_value(facets, "Country", "India") == (SF_COUNTRY_PARAM, INDIA_ID)
+    assert workday.find_country_filter(facets, "India") == (SF_COUNTRY_PARAM, [INDIA_ID])
 
 
 def test_country_facet_nested_adobe(load_fixture):
     facets = load_fixture("workday_adobe_unfiltered.json")["facets"]
-    assert workday.find_facet_value(facets, "Country", "india") == ("locationCountry", INDIA_ID)
+    assert workday.find_country_filter(facets, "india") == ("locationCountry", [INDIA_ID])
+
+
+def test_country_facet_other_descriptor_names():
+    facets = [{"facetParameter": "Location_Country", "descriptor": "Country / Territory",
+               "values": [{"descriptor": "Indiana", "id": "x"}, {"descriptor": "India", "id": "in"}]}]
+    assert workday.find_country_filter(facets, "India") == ("Location_Country", ["in"])
+
+
+def test_locations_fallback_like_intel():
+    facets = [{"facetParameter": "locationMainGroup", "values": [
+        {"facetParameter": "locations", "descriptor": "Locations", "values": [
+            {"descriptor": "India, Bangalore", "id": "blr"},
+            {"descriptor": "US, Indiana, Indianapolis", "id": "ind"},
+            {"descriptor": "Virtual India", "id": "vin"}]}]}]
+    assert workday.find_country_filter(facets, "India") == ("locations", ["blr", "vin"])
 
 
 def test_country_facet_missing(load_fixture):
     facets = load_fixture("workday_adobe_unfiltered.json")["facets"]
-    assert workday.find_facet_value(facets, "Country", "Atlantis") is None
+    assert workday.find_country_filter(facets, "Atlantis") is None
 
 
 def test_parse_posting(load_fixture):

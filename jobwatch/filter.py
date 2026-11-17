@@ -1,5 +1,12 @@
-"""Title + location rules from config.yaml. Case-insensitive, whole-word."""
+"""Title + location rules from config.yaml. Case-insensitive, whole-word.
+
+A "word" is letters and digits only, so "Lead_ Vice President" still
+matches `lead` (underscores and punctuation are boundaries).
+"""
 import re
+
+EDGE_BEFORE = r"(?<![^\W_])"  # previous char is not a letter/digit
+EDGE_AFTER = r"(?![^\W_])"    # next char is not a letter/digit
 
 
 def compile_phrases(phrases):
@@ -8,7 +15,7 @@ def compile_phrases(phrases):
         words = str(phrase).split()
         if words:
             body = r"\s+".join(re.escape(w) for w in words)
-            patterns.append(re.compile(rf"(?<!\w){body}(?!\w)", re.IGNORECASE))
+            patterns.append(re.compile(EDGE_BEFORE + body + EDGE_AFTER, re.IGNORECASE))
     return patterns
 
 

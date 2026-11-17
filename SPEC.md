@@ -31,8 +31,10 @@ config.yaml -> adapters (one per ATS platform) -> normalize to Job
 
 ## v1 platforms
 1. **Greenhouse**: `GET https://boards-api.greenhouse.io/v1/boards/{token}/jobs`
-2. **Workday**: `POST https://{host}/wday/cxs/{tenant}/{site}/jobs` with a JSON body (`limit` max 20, paginate with `offset`). Large tenants have thousands of jobs, so use the "Country" facet the response exposes to narrow to India before paginating (search text is not used; the country facet alone is enough). Multi-location postings show only "N Locations"; use the primary location from the job URL path instead (per-job detail requests trip Workday's rate limit).
+2. **Workday**: `POST https://{host}/wday/cxs/{tenant}/{site}/jobs` with a JSON body (`limit` max 20, paginate with `offset`). Large tenants have thousands of jobs, so use the country facet the response exposes (its name varies: "Country", "Country / Territory", "Location Country") to narrow to India before paginating; tenants without one get every "Locations" value naming India (search text is not used). Multi-location postings show only "N Locations"; use the primary location from the job URL path instead (per-job detail requests trip Workday's rate limit).
 3. **SmartRecruiters**: `GET https://api.smartrecruiters.com/v1/companies/{id}/postings` (paginate; supports country filtering)
+4. **Lever** (added 2026-11-16): `GET https://api.lever.co/v0/postings/{slug}?mode=json` (EU boards: `api.eu.lever.co`). One call returns all postings. Posting date: `createdAt` (epoch ms).
+5. **Ashby** (added 2026-11-17): `GET https://api.ashbyhq.com/posting-api/job-board/{board}?includeCompensation=false`. One call returns all listed postings. Posting date: `publishedAt`.
 
 Endpoint details above are my best understanding. **Verify each against a real response before writing the adapter**, and record which field (if any) gives a posting date. Workday returns relative strings like "Posted 3 Days Ago"; parse what is reliable, otherwise set `posted_at = None`.
 
@@ -50,11 +52,12 @@ Matching is case-insensitive and whole-word (`intern` does not match "Internal")
 - The workflow commits `seen.json` back after each run. The daily commit also keeps the scheduled workflow from being auto-disabled for inactivity.
 - Reposted roles with a new platform ID will show up as new. That is acceptable for v1.
 
-## First run (seen.json missing or empty)
+## First run (per company: no keys for that company in seen.json)
+Applies on the very first run, and to any company later added to (or renamed in) config.yaml, so adding a company never floods the digest with long-open roles.
 1. Fetch and filter as normal.
-2. Keep only jobs with `posted_at` within the last 7 days. Jobs with unknown `posted_at` are seeded silently.
-3. If more than 100 remain, seed everything silently and post a single issue saying "Baseline seeded: N roles tracked".
-4. Otherwise post them as a normal digest and seed the rest.
+2. For first-run companies, keep only jobs with `posted_at` within the last 7 days. Jobs with unknown `posted_at` are seeded silently.
+3. If more than 100 remain across first-run companies, seed them all silently. If nothing else is new, the issue is titled "Baseline seeded: N roles tracked"; otherwise the normal digest gets a Baseline note.
+4. Otherwise post them in the normal digest and seed the rest.
 
 ## Digest
 - One GitHub Issue per run titled `New roles: YYYY-MM-DD (N)`, created with `gh issue create` using the workflow's `GITHUB_TOKEN`.
@@ -68,7 +71,7 @@ Matching is case-insensitive and whole-word (`intern` does not match "Internal")
 - `seen.json` is written only after the digest is successfully created, so a failed run never silently swallows jobs.
 
 ## Running
-- `python -m jobwatch --dry-run` prints the digest to stdout and writes nothing (for local testing).
+- `python -m jobwatch --dry-run` prints the digest to stdout and writes nothing (for local testing). `--only NAME` (repeatable, dry-run only) limits it to some companies.
 - GitHub Actions: daily cron at 03:30 UTC (9:00 AM IST) plus `workflow_dispatch` for manual runs. Permissions: `contents: write`, `issues: write`. No other secrets are needed in v1.
 
 ## Tech constraints

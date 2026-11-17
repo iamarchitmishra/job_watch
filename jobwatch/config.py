@@ -18,6 +18,8 @@ def load_config(path):
         for field in ("name", "platform"):
             if not company.get(field):
                 raise ValueError(f"{path}: companies[{i}] is missing '{field}'")
+        if ":" in company["name"]:
+            raise ValueError(f"{path}: company name '{company['name']}' must not contain ':'")
         own = company.get("filters") or {}
         unknown = set(own) - COMPANY_FILTER_KEYS
         if unknown:

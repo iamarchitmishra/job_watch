@@ -98,3 +98,17 @@ def test_dry_run_writes_nothing(tmp_path, capsys):
     assert "A: 4 fetched, 2 passed" in out
     assert "Issue title: New roles: 2026-11-16 (1)" in out
     assert not seen_path.exists()
+
+
+def test_only_requires_dry_run(capsys):
+    from jobwatch.__main__ import main
+    with pytest.raises(SystemExit):
+        main(["--only", "Arcesium"])
+    assert "needs --dry-run" in capsys.readouterr().err
+
+
+def test_only_unknown_company(capsys):
+    from jobwatch.__main__ import main
+    with pytest.raises(SystemExit):
+        main(["--dry-run", "--only", "Nope"])
+    assert "no company" in capsys.readouterr().err

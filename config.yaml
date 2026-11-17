@@ -10,13 +10,49 @@ companies:
     token: agoda                # verified
   - name: Rubrik
     platform: greenhouse
-    token: rubrik               # platform verified, token unverified
+    token: rubrik               # verified
   - name: Stripe
     platform: greenhouse
-    token: stripe               # unverified
+    token: stripe               # verified
   - name: Coinbase
     platform: greenhouse
-    token: coinbase             # unverified
+    token: coinbase             # verified
+  - name: Groww
+    platform: greenhouse
+    token: groww                # verified 2026-11-16
+  - name: Razorpay
+    platform: greenhouse
+    token: razorpaysoftwareprivatelimited   # verified 2026-11-16
+  - name: Databricks
+    platform: greenhouse
+    token: databricks           # verified 2026-11-16 (~84 India roles)
+  - name: MongoDB
+    platform: greenhouse
+    token: mongodb              # verified 2026-11-16 (~73 India roles)
+  - name: Okta
+    platform: greenhouse
+    token: okta                 # verified 2026-11-16 (~100 India roles)
+  - name: Zscaler
+    platform: greenhouse
+    token: zscaler              # verified 2026-11-16 (~84 India roles)
+  - name: InMobi
+    platform: greenhouse
+    token: inmobi               # verified 2026-11-16 (~42 India roles)
+  - name: Druva
+    platform: greenhouse
+    token: druva                # verified 2026-11-16 (~11 India roles)
+  - name: Twilio
+    platform: greenhouse
+    token: twilio               # verified 2026-11-17 (~11 India roles)
+  - name: Elastic
+    platform: greenhouse
+    token: elastic              # verified 2026-11-17 (~18 India roles)
+  - name: Airbnb
+    platform: greenhouse
+    token: airbnb               # verified 2026-11-17 (~12 India roles)
+  - name: Figma
+    platform: greenhouse
+    token: figma                # verified 2026-11-17 (~2 India roles)
 
   # ---------- Workday ----------
   - name: Salesforce
@@ -39,8 +75,45 @@ companies:
       title_include_add: [computer scientist]
       title_exclude_add: [senior computer scientist, sr computer scientist]
       title_exclude_remove: [staff]   # "Member of Technical Staff" is the IC title here
-  # - name: Akamai              # likely Workday; get host/tenant/site from any job's Apply URL
-  #   platform: workday
+  - name: Workday
+    platform: workday
+    host: workday.wd5.myworkdayjobs.com
+    tenant: workday
+    site: Workday               # verified 2026-11-17
+    country: India
+  - name: CrowdStrike
+    platform: workday
+    host: crowdstrike.wd5.myworkdayjobs.com
+    tenant: crowdstrike
+    site: crowdstrikecareers    # verified 2026-11-17
+    country: India
+  - name: Target
+    platform: workday
+    host: target.wd5.myworkdayjobs.com
+    tenant: target
+    site: targetcareers         # verified 2026-11-17
+    country: India
+    filters:                    # software titles are just "Engineer" / "Sr Engineer" (Lead, Principal above)
+      title_include_add: [engineer]
+  - name: Morgan Stanley
+    platform: workday
+    host: ms.wd5.myworkdayjobs.com
+    tenant: ms
+    site: External              # verified 2026-11-17
+    country: India
+    filters:                    # bank ranks: Analyst < Associate (~3-6 yrs) < VP < ED/MD
+      title_include_add: [developer]
+      title_exclude_add: [vice president, executive director, managing director]
+  - name: Intel
+    platform: workday
+    host: intel.wd1.myworkdayjobs.com
+    tenant: intel
+    site: External              # verified 2026-11-17 (no country facet; uses "India, ..." locations)
+    country: India
+  # Workday, not verified yet (rate-limited while checking, 2026-11-17):
+  #   NVIDIA nvidia.wd5 / NVIDIAExternalCareerSite, PayPal paypal.wd1 / jobs,
+  #   BlackRock blackrock.wd1 / BlackRock_Professional, Broadcom (VMware) broadcom.wd1 / External_Career
+  #   Walmart, Qualcomm, AMD, Nutanix, Intuit, HSBC: guessed site names returned 422; need the real Apply URL
 
   # ---------- SmartRecruiters ----------
   - name: ServiceNow
@@ -49,11 +122,57 @@ companies:
     country: in                 # server-side narrowing: ISO 3166 alpha-2 code
     filters:                    # Staff here is IC4 (~8+ yrs), so the global "staff" exclude stays
       title_include_add: [applications dev engineer]
+  - name: PhonePe
+    platform: smartrecruiters
+    company_id: PhonePeLimited  # verified 2026-11-16 (moved off Greenhouse)
+    country: in
+  - name: Swiggy
+    platform: smartrecruiters
+    company_id: swiggy          # verified 2026-11-16
+    country: in
+  - name: Freshworks
+    platform: smartrecruiters
+    company_id: Freshworks      # verified 2026-11-16
+    country: in
 
-  # ---------- v2 / not supported yet ----------
-  # Confluent: Ashby (likely) | Rippling: ats.rippling.com/rippling
-  # Bloomberg: Avature | Intuit: custom portal | LinkedIn: use LinkedIn job alerts
-  # Booking, Zalando: platform not checked yet
+  # ---------- Lever ----------
+  - name: CRED
+    platform: lever
+    slug: cred                  # verified 2026-11-16
+  - name: Meesho
+    platform: lever
+    slug: meesho                # verified 2026-11-16
+  - name: Paytm
+    platform: lever
+    slug: paytm                 # verified 2026-11-16 (~160 India roles)
+  - name: Mindtickle
+    platform: lever
+    slug: mindtickle            # verified 2026-11-16
+
+  # ---------- Ashby ----------
+  - name: Snowflake
+    platform: ashby
+    board: snowflake            # verified 2026-11-17 (~10 India roles)
+  - name: UiPath
+    platform: ashby
+    board: uipath               # verified 2026-11-17 (~9 India roles)
+  - name: Thoughtworks
+    platform: ashby
+    board: thoughtworks         # verified 2026-11-17
+
+  # ---------- not supported yet (checked 2026-11-16/17) ----------
+  # Supported platform but no India roles right now: Palantir (lever), Brex, Dropbox (greenhouse),
+  #   Canva (smartrecruiters), Plaid (ashby)
+  # Not found on any supported platform: Atlassian, Postman, BrowserStack, Chargebee, Juspay, Zepto, Dunzo,
+  #   Confluent, SAP (SuccessFactors), JPMorgan (Oracle), Goldman Sachs, American Express,
+  #   LTIMindtree, Publicis Sapient, EPAM, Turnitin, Checkout.com
+  # Rippling: ats.rippling.com/rippling
+  # Own portals: Flipkart, Amazon (amazon.jobs), Myntra (careers.myntra.com; old Greenhouse board is gone),
+  #   Zomato + Blinkit (Eternal: zomato.com/careers), Spinny (spinny.com/careers), Cars24,
+  #   Atlassian, Uber, Google, Microsoft, Intuit | Bloomberg: Avature | LinkedIn: use LinkedIn job alerts
+  # JioHotstar (JioStar): old Lever board jobs.lever.co/jiostar is gone (404); current portal unknown
+  # Workday, config not verified yet: NVIDIA, PayPal, Walmart (no "Country" facet / 422 on first try)
+  # Supported but few India roles: Twilio, Airbnb, GitLab, Elastic, Datadog (greenhouse); Grab (smartrecruiters)
 
 filters:
   title_include:
@@ -117,6 +236,16 @@ filters:
       - chandigarh
       - mohali
       - indore
+      # states, for boards that only give a state ("tamil nadu")
+      - karnataka
+      - telangana
+      - maharashtra
+      - tamil nadu
+      - haryana
+      - uttar pradesh
+      - kerala
+      - gujarat
+      - west bengal
 
 first_run:
   lookback_days: 7

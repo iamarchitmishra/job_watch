@@ -72,8 +72,19 @@ def main(argv=None):
     parser.add_argument("--dry-run", action="store_true", help="print the digest, write nothing")
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--seen", default="seen.json")
+    parser.add_argument("--only", metavar="NAME", action="append",
+                        help="with --dry-run: only these companies (repeatable, case-insensitive)")
     args = parser.parse_args(argv)
-    return run(load_config(args.config), args.seen, args.dry_run)
+    if args.only and not args.dry_run:
+        parser.error("--only is for testing and needs --dry-run")
+
+    cfg = load_config(args.config)
+    if args.only:
+        wanted = {name.lower() for name in args.only}
+        cfg["companies"] = [c for c in cfg["companies"] if c["name"].lower() in wanted]
+        if not cfg["companies"]:
+            parser.error(f"no company in {args.config} matches {args.only}")
+    return run(cfg, args.seen, args.dry_run)
 
 
 if __name__ == "__main__":

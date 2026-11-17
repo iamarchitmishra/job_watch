@@ -26,6 +26,10 @@ def m(text, *phrases):
     ("Software Engineering", "software engineer", False),
     ("Indiana - Indianapolis", "india", False),
     ("New Delhi, India", "delhi", True),
+    ("Java Lead_ Vice President", "lead", True),
+    ("HR Strats / Data Engineer _Vice President_", "vice president", True),
+    ("SDE-2", "sde", True),
+    ("SDE2", "sde", False),
 ])
 def test_whole_word_matching(text, phrase, expected):
     assert m(text, phrase) is expected
