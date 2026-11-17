@@ -1,0 +1,27 @@
+jobwatch/digest.py
+  92011c9aad744fbb 55
+ONBOARDING.md
+  92011c9aad744fbb 1-120
+README.md
+  92011c9aad744fbb 1-13,15-22,25-45,48-73,77-78,82-87,90-163,169,174-178,180-186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.7",
+  "base_commit_sha": "4e56cdb7e54fa2ef8553548e7620b830f46c622f",
+  "prompts": {
+    "92011c9aad744fbb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "024bf09a-745f-42c5-bee0-f6471031cc84",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Archit Mishra <archit.mishra1@1mg.com>",
+      "messages": [],
+      "total_additions": 293,
+      "total_deletions": 2,
+      "accepted_lines": 284,
+      "overriden_lines": 10
+    }
+  }
+}
